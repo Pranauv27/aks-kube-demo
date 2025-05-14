@@ -45,31 +45,34 @@
 name: 'Terraform'
 
 env:
-  # Setting an environment variable with the value of a configuration variable
-  CONFIG_DIRECTORY: "."
-  appId: '${{ secrets.CLIENT_ID }}'
-  password: '${{ secrets.CLIENT_SECRET }}'
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+    - main
   pull_request:
+    branches:
+    - main
 
+#Special permissions required for OIDC authentication
 permissions:
+  id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: dev
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
+    env:
+      #this is needed since we are running terraform with read-only permissions
+      ARM_SKIP_PROVIDER_REGISTRATION: true
 
     steps:
+
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
@@ -78,31 +81,33 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-        subscription_id: "bc307ddb-7a95-4e66-8ed5-cf58ed3d2987"
-        resource_group_name: "rg-tfstate"
-        storage_account_name: "tfstatepranaus"
-        container_name: "state"
-        key: "az-pranaus.tfstate"
+        terraform_wrapper: false
+        # cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        # subscription_id: "bc307ddb-7a95-4e66-8ed5-cf58ed3d2987"
+        # resource_group_name: "rg-tfstate"
+        # storage_account_name: "tfstatepranaus"
+        # container_name: "state"
+        # key: "az-pranaus.tfstate"
+
+    - name: Azure Login 
+      uses: azure/login@v2
+      with:
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
-      working-directory: '${{ env.CONFIG_DIRECTORY }}'
 
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -check
-      working-directory: '${{ env.CONFIG_DIRECTORY }}'
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan -input=false -parallelism=1
-      working-directory: '${{ env.CONFIG_DIRECTORY }}'
+      run: terraform plan -parallelism=1 -no-color -out tfplan
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
       if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false -parallelism-1
-      working-directory: '${{ env.CONFIG_DIRECTORY }}'
+      run: terraform apply -auto-approve tfplan -input=false -parallelism-1
