@@ -27,7 +27,7 @@ terraform {
     # resource_group_name  = ""
     # storage_account_name = ""
     # container_name       = ""
-    key                  = ""
+    key                  = "az-pranaus.tfstate"
     use_oidc             = true
   }
   required_version = ">= 0.14"
