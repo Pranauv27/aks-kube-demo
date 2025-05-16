@@ -11,5 +11,5 @@ variable "password" {
 variable "resource_prefix" {
   description = "Resource prefix name"
   type        = string
-  default     = "pranau"
+  default     = "pranaus"
 }
