@@ -55,7 +55,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan -parallelism=1 -no-color -var="appId=${{ secrets.AKS_CLIENT_ID }}" -var="password=${{ secrets.AKS_CLIENT_SECRET }}"
+      run: terraform plan -parallelism=1 -no-color -var="appId=${{ secrets.AZURE_CLIENT_ID }}" -var="password=${{ secrets.AZURE_CLIENT_SECRET }}"
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
