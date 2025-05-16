@@ -58,5 +58,5 @@ jobs:
       run: terraform plan -parallelism=1 -no-color -var="appId=${{ secrets.AZURE_CLIENT_ID }}" -var="password=${{ secrets.AZURE_CLIENT_SECRET }}"
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve -input=false -parallelism-1
