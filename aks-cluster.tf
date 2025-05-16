@@ -19,6 +19,7 @@ resource "azurerm_kubernetes_cluster" "default" {
     node_count      = 2
     vm_size         = "Standard_D2_v2"
     os_disk_size_gb = 30
+    os_sku          = "Ubuntu"
   }
 
   service_principal {
