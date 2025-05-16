@@ -24,11 +24,6 @@ terraform {
     }
   }
   backend "azurerm" {
-    # subscription_id      = ""
-    # resource_group_name  = ""
-    # storage_account_name = ""
-    # container_name       = ""
-    key      = "az-pranaus.tfstate"
     use_oidc = true
   }
   required_version = ">= 0.14"

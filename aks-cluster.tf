@@ -1,7 +1,5 @@
-resource "random_pet" "prefix" {}
-
 resource "azurerm_resource_group" "default" {
-  name     = "${random_pet.prefix.id}-rg"
+  name     = "${var.resource_prefix}-rg"
   location = "West US 2"
 
   tags = {
@@ -10,10 +8,10 @@ resource "azurerm_resource_group" "default" {
 }
 
 resource "azurerm_kubernetes_cluster" "default" {
-  name                = "${random_pet.prefix.id}-aks"
+  name                = "${var.resource_prefix}-aks"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
-  dns_prefix          = "${random_pet.prefix.id}-k8s"
+  dns_prefix          = "${var.resource_prefix}-k8s"
   kubernetes_version  = "1.26.3"
 
   default_node_pool {
@@ -24,8 +22,8 @@ resource "azurerm_kubernetes_cluster" "default" {
   }
 
   service_principal {
-    client_id     = "9cbf1203-dc4f-4d5a-b387-b406b7e45152"
-    client_secret = "f1n8Q~JX0qtTcdzrXUgdvEAaIz46j7KfEfwTxciz"
+    client_id     = var.appId
+    client_secret = var.password
   }
 
   role_based_access_control_enabled = true
