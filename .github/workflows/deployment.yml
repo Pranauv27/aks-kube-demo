@@ -5,7 +5,6 @@ env:
   ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_AZUREAD: true
-  ARM_SKIP_PROVIDER_REGISTRATION: true
 
 on:
   push:
@@ -55,7 +54,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan -parallelism=1 -no-color -var="appId=${{ secrets.AZURE_CLIENT_ID }}" -var="password=${{ secrets.AZURE_CLIENT_SECRET }}"
+      run: terraform plan -parallelism=1 -var="appId=${{ secrets.AZURE_CLIENT_ID }}" -var="password=${{ secrets.AZURE_CLIENT_SECRET }}"
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
